@@ -1,0 +1,2 @@
+id,village,date,fact,place,lat,lon,source_url,source_type,checked_by,checked_on,tags
+X01,village-name,YYYY-MM-DD,"One fact per row, one sentence, in English.",place,,,https://link-to-the-source,primary or secondary or claim,your name,YYYY-MM-DD,topic;topic

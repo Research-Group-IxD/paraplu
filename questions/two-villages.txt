@@ -1,0 +1,10 @@
+# Demo for: python3 poc.py gestel --with strijp --batch questions/two-villages.txt
+# Gestel answers first, then Strijp may add a fact, correct one, or PASS.
+When did Gestel become part of Eindhoven?
+# expect: Gestel cites G01; Strijp may add S01 or S02
+Were there bombings here during the war?
+# expect: Gestel says it does not know; Strijp adds S07
+Wie heeft hier vroeger gevoetbald?
+# expect: Gestel does not know; Strijp adds S14 or S13, in Dutch
+Has it been a wet week?
+# expect: Gestel cites L-RAIN7; Strijp passes
