@@ -2,6 +2,23 @@
 
 Every fix below came from a real answer in `logs/truth_check.csv` (model gemma3:12b on the team's MacBook). Newest first.
 
+## 8 Nov: truth check of all 123 logged answers
+
+Every answer in `logs/truth_check.csv` (26 Oct to 7 Nov, gemma3:12b) now has a verdict. Claude proposed a verdict and a reason for each answer from the fact lists, the auto notes and this changelog; Nikita spot-checked them. Verdicts describe what the visitor saw: true, partly (true core plus an invented or off-topic part), false, refused well (said it does not know, or PASS), blocked ok or blocked wrongly (a reaction stopped by the topic check).
+
+| Phase | Answers | Correct, refused or blocked well | False | Right language |
+| --- | --- | --- | --- | --- |
+| Gestel alone, 26 to 27 Oct | 25 | 92% | 0 | 24/25 |
+| First two-village runs, 29 to 30 Oct | 16 | 69% | 1 | 8/16 |
+| 2 Nov after round 1 | 22 | 82% | 1 | 22/22 |
+| 2 Nov after round 2 | 18 | 56% | 2 | 18/18 |
+| 2 Nov after round 3 | 12 | 75% | 2 | 12/12 |
+| 2 Nov after round 4 | 6 | 83% | 0 | 6/6 |
+| 2 Nov client demo with Coen | 14 | 93% | 1 | 14/14 |
+| 7 Nov after the stability fix | 10 | 90% | 0 | 10/10 |
+
+What it shows: the language fix worked (every answer in the right language from round 1 on); the round-2 conclusion rule made things worse and was removed; the topic check blocked 12 bad reactions but also one good football answer. Citations are still the weak spot: of the 97 answers that carry fact ids, 51 cite correctly, 28 put ids behind small talk and 18 cite a wrong id. Small samples and different question sets per phase, so this is a trend, not a benchmark.
+
 ## 7 Nov: the Mac froze after the client demo
 
 **Problem.** On the evening of 2 Nov, answers took minutes and never arrived, the Mac lagged and the sound crackled.
@@ -36,4 +53,4 @@ Rules 2, 3, 5 and 8 sharpened: ids only behind sentences a fact supports, no cla
 - Ids put behind small talk ("dat weet ik niet [G11]") and claims a fact doesn't make: only the hand check catches these.
 - The villages hold different kinds of facts (Gestel: when the mill was first mentioned; Strijp: when its name was recorded), so "who is older" goes wrong. Next: the same fact types for every village, and comparable numbers from one source (CBS district figures).
 - Two villages take about 20 seconds per question (target 10 s).
-- Verdicts in the truth log are not filled in yet, so there are no accuracy numbers.
+- The truth check (8 Nov) is one pass by Claude with a spot-check; the next round should be marked by a teammate who did not write the prompts.
