@@ -23,6 +23,7 @@ Needs nothing but Python 3.9+ and a running Ollama. No pip installs.
 import argparse
 import csv
 import json
+import math
 import re
 import sys
 import time
@@ -54,13 +55,33 @@ MODEL_OPTIONS = {"temperature": 0.2, "num_ctx": 4096, "num_predict": 220}
 KEEP_ALIVE = "20m"
 REQUEST_TIMEOUT = 120   # seconds; past that something is wrong (see doctor.py)
 
-# Where each village is, so we can ask for its weather. Add one line when your
+# Where each village is, so we can ask for its weather and its fine dust. Add one line when your
 # village gets live data. A 7-day rain total barely differs inside Eindhoven,
 # so "roughly the village" is precise enough.
 LIVE_PLACES = {
     "gestel": (51.43, 5.46),
     "strijp": (51.45, 5.45),
+    "woensel": (51.47, 5.47),
 }
+
+# Villages with an official air measuring station of their own (Luchtmeetnet, RIVM):
+# village name -> (station number, street the station stands on).
+# Woensel's station is on the Genovevalaan and measures NO2, O3 and PM10.
+LIVE_AIR_STATIONS = {
+    "woensel": ("NL10236", "Genovevalaan"),
+}
+
+# Fine dust comes from the city's own sensors (data.eindhoven.nl, dataset
+# real-time-fijnstof-monitoring) and works for EVERY village in LIVE_PLACES: the
+# sensors carry coordinates, so each village reads the sensors close to its point.
+# Close = within DUST_NEAR_KM; if none is that close, the single nearest sensor
+# counts as long as it is within DUST_FAR_KM. Further away is not "here" any more.
+DUST_NEAR_KM = 1.5
+DUST_FAR_KM = 3.0
+DUST_CACHE_SECONDS = 600      # all villages share one download for 10 minutes
+_dust_cache = {"at": 0.0, "rows": []}
+DUST_URL = ("https://data.eindhoven.nl/api/explore/v2.1/catalog/datasets/"
+            "real-time-fijnstof-monitoring/records")
 
 # The rules every village gets. Short and numbered, because small models follow
 # numbered rules better than a paragraph.
@@ -194,13 +215,152 @@ def rain_last_7_days(village_label, lat, lon):
             "source_type": "live", "source_url": "https://open-meteo.com/"}
 
 
+def air_now(village_label, station, street):
+    """Asks Luchtmeetnet (free, no key, hourly values) for the latest NO2 and O3
+    values of one station. Returns a live fact, or None when it fails, just like the rain.
+    The fact holds the numbers only: the code gives no "good" or "bad" verdict,
+    so the village cannot repeat one that nobody checked."""
+    url = ("https://api.luchtmeetnet.nl/open_api/measurements"
+           f"?station_number={station}&order_by=timestamp_measured&order_direction=desc")
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            rows = json.load(resp)["data"]
+        # Newest rows come first, one row per substance per hour: keep the newest of each.
+        # Only the gases: fine dust comes from the city's own sensors (see dust_now),
+        # and two different PM10 numbers in one prompt would confuse the model.
+        latest = {}
+        for row in rows:
+            if row.get("value") is not None and row["formula"] in ("NO2", "O3"):
+                latest.setdefault(row["formula"], row)
+        if not latest:
+            raise ValueError("no measurements in the answer")
+        newest = max(r["timestamp_measured"] for r in latest.values())
+        hour = datetime.fromisoformat(newest.replace("Z", "+00:00")).astimezone().strftime("%H:%M")
+        values = ", ".join(f"{name} {round(r['value'])}" for name, r in sorted(latest.items()))
+    except Exception as e:                      # no internet, API changed, anything: skip it
+        print(f"(live air data skipped: {e})")
+        return None
+    return {"id": "L-AIR", "fact": f"Air at the {street} measuring station in {village_label}, "
+                                   f"latest hourly values in micrograms per cubic metre: {values} "
+                                   f"(Luchtmeetnet, measured around {hour}).",
+            "source_type": "live", "source_url": f"https://www.luchtmeetnet.nl/meetpunten?station={station}"}
+
+
+def km_between(lat1, lon1, lat2, lon2):
+    """Distance in km between two points. Flat-map maths: fine inside one city."""
+    dy = (lat2 - lat1) * 111.2
+    dx = (lon2 - lon1) * 111.2 * math.cos(math.radians((lat1 + lat2) / 2))
+    return math.hypot(dx, dy)
+
+
+def dust_rows():
+    """Downloads the newest reading of every city fine-dust sensor (free, no key).
+    Kept for a few minutes, so three villages do not download the same list three times."""
+    if _dust_cache["rows"] and time.time() - _dust_cache["at"] < DUST_CACHE_SECONDS:
+        return _dust_cache["rows"]
+    rows = []
+    for offset in (0, 100):                     # the portal gives at most 100 rows per call
+        url = (f"{DUST_URL}?limit=100&offset={offset}"
+               "&order_by=lossetimestamps_timestamp%20desc")
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            rows += json.load(resp)["results"]
+    newest = {}                                 # sensor number -> its newest usable row
+    for row in rows:                            # rows come newest first
+        try:
+            row["lat"], row["lon"] = float(row["latitude"]), float(row["longitude"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if row.get("pm25") is not None:
+            newest.setdefault(row["location"], row)
+    _dust_cache.update(at=time.time(), rows=list(newest.values()))
+    return _dust_cache["rows"]
+
+
+def dust_now(village_label, lat, lon):
+    """Fine dust near one village: the average of the city sensors close to its point.
+    Returns a live fact, or None when it fails or no sensor is near enough."""
+    try:
+        ranked = sorted((km_between(lat, lon, r["lat"], r["lon"]), r) for r in dust_rows())
+        ranked = [(km, r) for km, r in ranked]
+        near = [r for km, r in ranked if km <= DUST_NEAR_KM]
+        if near:
+            where = ("1 city sensor" if len(near) == 1 else f"average of {len(near)} city sensors") \
+                    + f" within {DUST_NEAR_KM:g} km"
+        elif ranked and ranked[0][0] <= DUST_FAR_KM:
+            near = [ranked[0][1]]
+            where = f"the nearest city sensor, about {ranked[0][0]:.1f} km away"
+        else:
+            raise ValueError(f"no fine-dust sensor within {DUST_FAR_KM:g} km of {village_label}")
+        stamp = max(r["lossetimestamps_timestamp"] for r in near)
+        hour = datetime.fromisoformat(stamp.replace("Z", "+00:00")).astimezone().strftime("%H:%M")
+        def mean(key):
+            values = [r[key] for r in near if r.get(key) is not None]
+            return round(sum(values) / len(values), 1) if values else None
+        parts = [f"{name} {mean(key)}" for name, key in (("PM2.5", "pm25"), ("PM10", "pm10"))
+                 if mean(key) is not None]
+    except Exception as e:                      # no internet, API changed, anything: skip it
+        print(f"(live fine-dust data skipped: {e})")
+        return None
+    return {"id": "L-DUST", "fact": f"Fine dust in the air in {village_label}, {where}, in micrograms "
+                                    f"per cubic metre: {', '.join(parts)} "
+                                    f"(Eindhoven open data, measured around {hour}).",
+            "source_type": "live",
+            "source_url": "https://data.eindhoven.nl/explore/dataset/real-time-fijnstof-monitoring/"}
+
+
+# Open-Meteo sends the sky as a WMO weather code. These are the plain words for it,
+# so the village reads "light rain" and does not have to guess what code 61 means.
+WEATHER_WORDS = {
+    0: "clear sky", 1: "mostly clear", 2: "partly cloudy", 3: "overcast",
+    45: "fog", 48: "freezing fog",
+    51: "light drizzle", 53: "drizzle", 55: "heavy drizzle",
+    56: "light freezing drizzle", 57: "freezing drizzle",
+    61: "light rain", 63: "rain", 65: "heavy rain",
+    66: "light freezing rain", 67: "freezing rain",
+    71: "light snow", 73: "snow", 75: "heavy snow", 77: "snow grains",
+    80: "light rain showers", 81: "rain showers", 82: "heavy rain showers",
+    85: "light snow showers", 86: "snow showers",
+    95: "thunderstorm", 96: "thunderstorm with hail", 99: "thunderstorm with heavy hail",
+}
+
+
+def weather_now(village_label, lat, lon):
+    """Asks Open-Meteo (free, no key) for the weather right now: sky, temperature,
+    how it feels and the wind. Returns a live fact, or None when it fails."""
+    url = ("https://api.open-meteo.com/v1/forecast"
+           f"?latitude={lat}&longitude={lon}"
+           "&current=temperature_2m,apparent_temperature,wind_speed_10m,weather_code"
+           "&timezone=Europe%2FAmsterdam")
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            now = json.load(resp)["current"]
+        sky = WEATHER_WORDS.get(now.get("weather_code"))
+        parts = ([sky] if sky else []) + [
+            f"{now['temperature_2m']} degrees Celsius",
+            f"feels like {now['apparent_temperature']} degrees",
+            f"wind {round(now['wind_speed_10m'])} km per hour"]
+    except Exception as e:                      # no internet, API changed, anything: skip it
+        print(f"(live weather skipped: {e})")
+        return None
+    fetched = datetime.now().strftime("%H:%M")
+    return {"id": "L-WEATHER", "fact": f"Weather in {village_label} right now: {', '.join(parts)} "
+                                       f"(Open-Meteo weather model, fetched today at {fetched}).",
+            "source_type": "live", "source_url": "https://open-meteo.com/"}
+
+
 def live_facts_for(village):
-    """Collects the live facts for one village. Today that is only rain."""
+    """Collects the live facts for one village. Every village with a place gets the
+    weather now, rain and fine dust; a village with its own Luchtmeetnet station also gets NO2 and ozone."""
+    facts = []
     place = LIVE_PLACES.get(village["name"])
-    if not place:
-        return []
-    fact = rain_last_7_days(village["label"], *place)
-    return [fact] if fact else []
+    if place:
+        facts.append(weather_now(village["label"], *place))
+        facts.append(rain_last_7_days(village["label"], *place))
+        facts.append(dust_now(village["label"], *place))
+    station = LIVE_AIR_STATIONS.get(village["name"])
+    if station:
+        facts.append(air_now(village["label"], *station))
+    return [f for f in facts if f]
 
 
 # ---------- building the prompts ----------

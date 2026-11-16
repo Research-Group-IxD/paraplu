@@ -29,7 +29,7 @@ Type `quit` to stop a Terminal chat, Ctrl+C to stop the page. Both free the mode
 ## How one question travels
 
 1. The code decides the language (English or Dutch) by counting typical words in the question.
-2. It builds one message for the model: the village's character (`villages/<name>/persona.md`), eight rules, the village's facts with their ids (`villages/<name>/facts.csv`, like `[G05] Vincent van Gogh painted the Genneper watermill four times in 1884.`), one live fact (rain of the last 7 days from Open-Meteo), and the question.
+2. It builds one message for the model: the village's character (`villages/<name>/persona.md`), eight rules, the village's facts with their ids (`villages/<name>/facts.csv`, like `[G05] Vincent van Gogh painted the Genneper watermill four times in 1884.`), the live facts (the weather right now and the rain of the last 7 days from Open-Meteo; fine dust from the city's own sensors near the village, from data.eindhoven.nl; for Woensel also NO2 and ozone from the Luchtmeetnet station on the Genovevalaan), and the question.
 3. The model answers and puts fact ids behind its sentences.
 4. The code checks the answer (see the table below), shows the facts it used with their source links, and saves it in `logs/truth_check.csv`.
 5. The second village gets the question and the first village's answer (never its facts) and may speak only if one of its own facts answers the question. Otherwise it passes.
@@ -54,7 +54,7 @@ What these checks can't catch: an id put behind a sentence that the fact doesn't
 1. Copy `villages/_template` to `villages/<your-village>` (lowercase, no spaces, for example `woensel`).
 2. Write `persona.md`: character only, no facts. Notes written `<!-- like this -->` are for you; the model never sees them.
 3. Fill `facts.csv`: one fact per row with an id (W01, W02, ...) and a source link.
-4. Optional live data: add the village's coordinates to `LIVE_PLACES` in `poc.py`.
+4. Optional live data: add the village's coordinates to `LIVE_PLACES` in `poc.py`. Does the village have its own Luchtmeetnet station? Add it to `LIVE_AIR_STATIONS`. Weather, rain and fine dust then work by themselves.
 5. Test it: `python3 poc.py <your-village>`. No other code changes needed.
 
 ## Files

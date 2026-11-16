@@ -2,6 +2,12 @@
 
 Every fix below came from a real answer in `logs/truth_check.csv` (model gemma3:12b on the team's MacBook). Newest first.
 
+## 16 Nov: Woensel added, with three new live facts
+
+Woensel (the Oude Toren, 11 facts from Mai's research in the Village entities doc) is the third village. New live fact `L-AIR`: the latest hourly NO2 and O3 values of the Luchtmeetnet station on the Genovevalaan (NL10236), which stands in Woensel itself. New live fact `L-DUST`: PM2.5 and PM10 from the city's own fine-dust sensors (data.eindhoven.nl, real-time-fijnstof-monitoring), for every village in `LIVE_PLACES`: the average of the sensors within 1.5 km of the village's point, or else the nearest one within 3 km. New live fact `L-WEATHER` for every village: sky, temperature, feels-like temperature and wind right now, from Open-Meteo. The air facts give numbers only, no "good" or "bad", because no checked fact says where the line is.
+
+Not tested with the model yet: the files load and the checks run, but nobody has run `questions/woensel.txt` on the Mac, and the three new live calls were only tested against sample answers. "Near the village" is a circle around one point, not the real district border, and neighbouring villages can share a sensor. Still open for Woensel: CBS 2023 figures like G13 to G20, a source link for W05 and the exact page for W02, and facts for the everyday questions the persona promises (bus, market day, parks).
+
 ## 8 Nov: truth check of all 123 logged answers
 
 Every answer in `logs/truth_check.csv` (26 Oct to 7 Nov, gemma3:12b) now has a verdict. Claude proposed a verdict and a reason for each answer from the fact lists, the auto notes and this changelog; Nikita spot-checked them. Verdicts describe what the visitor saw: true, partly (true core plus an invented or off-topic part), false, refused well (said it does not know, or PASS), blocked ok or blocked wrongly (a reaction stopped by the topic check).
