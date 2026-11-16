@@ -11,3 +11,11 @@ G09,gestel,1972,"In 1972 Bishop Bluyssen ordered the Sint-Lambertuskerk to be de
 G10,gestel,1931-05-10,"The statue of Saint George and the dragon in front of the church was unveiled on 10 May 1931 for the 500th anniversary of the Sint-Jorisgilde of Gestel and Blaarthem.",Sint-Lambertuskerk,,,https://www.grooteindhoven.nl/sint-lambertuskerk-van-gestel-6.3.518791.bdd6922a93,secondary,,,church;guild
 G11,gestel,1998,"The High Tech Campus began as a business area in 1998; it calls itself the smartest square kilometre in Europe.",High Tech Campus,,,https://www.eindhoven-now.nl/wijken/755-gestel-eindhoven.html,secondary,,,campus;technology
 G12,gestel,,"Cafe De Gouden Bal claims to be the oldest pub in Eindhoven.",Gestel,,,https://www.eindhoven-now.nl/wijken/755-gestel-eindhoven.html,claim,,,pub
+G13,gestel,2023,"Gestel (the districts Rozenknopje, Oud-Gestel and Gestelse Ontginning) has about 28,600 residents.",Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;population
+G14,gestel,2023,About one in five Gestel residents (19%) is 65 or older; the Eindhoven average is 16.5%.,Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;age
+G15,gestel,2023,About 13% of Gestel residents are children under 15; the Eindhoven average is 13.8%.,Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;age
+G16,gestel,2023,88% of the homes in Gestel were built before 2000.,Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;housing
+G17,gestel,2023,58% of the homes in Gestel are rented.,Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;housing
+G18,gestel,2023,"The average income per resident in Gestel is about 32,400 euros a year; the Eindhoven average is about 34,200 euros.",Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;income
+G19,gestel,2023,"Oud-Gestel has the lowest average income per resident of all 20 Eindhoven districts (about 28,600 euros), while neighbouring Rozenknopje has about 37,300 euros.",Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;income;contrast
+G20,gestel,2023,About 28% of Gestel residents have an origin outside Europe; the Eindhoven average is 29%.,Gestel,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;origin

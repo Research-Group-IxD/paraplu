@@ -16,3 +16,10 @@ S14,strijp,1956-1957,"In 1956-57, his first Eredivisie season, Coen Dillen score
 S15,strijp,1954-1957,Coen Dillen played 5 matches for the Netherlands national team between 1954 and 1957 and scored 4 goals.,,,,https://en.wikipedia.org/wiki/Coen_Dillen,secondary,,,coen;international
 S16,strijp,1954-11-25,Professional football started in the Netherlands in 1954; the KNVB gives 25 November 1954 as the start.,,,,https://www.knvb.com/about-the-knvb/history,secondary,,,football
 S17,strijp,1990-07-24,Coen Dillen died on 24 July 1990; in 2003 a statue of him was placed at the PSV stadium.,PSV,,,https://en.wikipedia.org/wiki/Coen_Dillen,secondary,,,coen;memorial
+S18,strijp,2023,"Strijp (the districts Oud-Strijp, Halve Maan and Meerhoven) has about 39,200 residents.",Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;population
+S19,strijp,2023,Only 11% of Strijp residents are 65 or older; the Eindhoven average is 16.5%.,Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;age
+S20,strijp,2023,"About 15% of Strijp residents are children under 15; in Meerhoven it is 22%, the highest share of all 20 Eindhoven districts.",Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;age;contrast
+S21,strijp,2023,Only about half (52%) of the homes in Strijp were built before 2000; in Meerhoven just 5%.,Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;housing;contrast
+S22,strijp,2023,57% of the homes in Strijp are rented: 71% in Oud-Strijp but only 26% in Meerhoven.,Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;housing;contrast
+S23,strijp,2023,"The average income per resident in Strijp is about 37,900 euros a year; the Eindhoven average is about 34,200 euros.",Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;income
+S24,strijp,2023,About 27% of Strijp residents have an origin outside Europe; the Eindhoven average is 29%.,Strijp,,,https://www.cbs.nl/nl-nl/cijfers/detail/85618NED,primary,,,cbs;origin
