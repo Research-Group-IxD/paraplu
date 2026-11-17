@@ -8,12 +8,12 @@
   :root {
     --bg: #f6f4ef; --panel: #ffffff; --ink: #1f2328; --muted: #5f6670; --line: #e3dfd6;
     --you: #2f3a48; --you-ink: #ffffff; --warn: #a3361f; --warn-bg: #fbe9e4;
-    --gestel: #2c6e8f; --strijp: #b3262d; --other: #6b5b95;
+    --gestel: #2c6e8f; --strijp: #b3262d; --woensel: #2f7d4e; --other: #6b5b95;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #16181c; --panel: #1f2228; --ink: #e8e6e1; --muted: #9aa1ab; --line: #30343c;
             --you: #3a4a5e; --you-ink: #fff; --warn: #ff9b85; --warn-bg: #3a2420;
-            --gestel: #6fb3d6; --strijp: #f07a7f; --other: #b9a7e6; }
+            --gestel: #6fb3d6; --strijp: #f07a7f; --woensel: #75c995; --other: #b9a7e6; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
@@ -21,10 +21,11 @@
   header { padding: 20px 16px 8px; max-width: 860px; margin: 0 auto; }
   h1 { font-size: 24px; margin: 0; letter-spacing: -0.01em; }
   .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 16px; max-width: 860px; margin: 0 auto; }
-  .controls label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
-  select { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line);
-           background: var(--panel); color: var(--ink); min-width: 150px; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 16px 2px; max-width: 860px; margin: 0 auto; }
+  .controls label { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  select { font: inherit; font-size: 13px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line);
+           background: var(--panel); color: var(--ink); min-width: 130px; }
+  .hint-bar { max-width: 860px; margin: 0 auto; padding: 6px 16px 0; font-size: 12.5px; color: var(--muted); }
   main { max-width: 860px; margin: 0 auto; padding: 0 16px 200px; }
   .msg { margin: 14px 0; display: flex; flex-direction: column; }
   .msg.you { align-items: flex-end; }
@@ -60,6 +61,12 @@
                      border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
   button.send { font: inherit; font-weight: 600; padding: 0 18px; border-radius: 12px; border: 0;
                 background: var(--ink); color: var(--bg); cursor: pointer; }
+  button.match-btn { font: inherit; font-weight: 600; padding: 0 14px; border-radius: 12px;
+                     border: 1px solid var(--gestel); background: var(--panel); color: var(--gestel); cursor: pointer; }
+  .suggest button.match-pill { border-color: var(--gestel); color: var(--gestel); font-weight: 500; }
+  .pick-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+  .pick-row button { font: inherit; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+                     border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
   button:disabled { opacity: .5; cursor: wait; }
   .foot { font-size: 12px; color: var(--muted); text-align: center; padding: 0 16px 6px; }
 </style>
@@ -70,48 +77,56 @@
   <div class="sub">Proof of concept · Eindhoven's former villages answer from their own checked facts · <span id="model">…</span></div>
 </header>
 
-<div class="controls">
-  <label>Talk to
-    <select id="village"></select>
-  </label>
-  <label>Second village listens
-    <select id="guest"></select>
-  </label>
-  <label>Language
-    <select id="lang">
-      <option value="auto">Follow my question</option>
-      <option value="en">English</option>
-      <option value="nl">Nederlands</option>
-    </select>
-  </label>
-</div>
-
 <main id="chat">
   <p class="intro">Ask in English or Dutch. Each fact a village uses shows up under its answer, with its source.
      A village says so when its facts do not cover your question, and a second village only joins in when it has a fact of its own to add.</p>
 </main>
 
 <form id="ask">
-  <div class="suggest" id="suggest"></div>
-  <div class="bar">
-    <input type="text" id="q" placeholder="Ask a village something…" autocomplete="off" autofocus>
-    <button class="send" id="send">Ask</button>
+  <div class="controls">
+    <label>Talk to
+      <select id="village"></select>
+    </label>
+    <label>Second village listens
+      <select id="guest"></select>
+    </label>
+    <label>Language
+      <select id="lang">
+        <option value="auto">Follow my question</option>
+        <option value="en">English</option>
+        <option value="nl">Nederlands</option>
+      </select>
+    </label>
   </div>
-  <div class="foot">AI voices made by Fontys students (Moonshot AI team), not the real places or people. Every answer is saved for a hand check.</div>
+  <div class="suggest" id="suggest"></div>
+  <div class="hint-bar"><strong>Tip:</strong> Type any question and click <strong>Ask</strong>, or describe yourself (for example: age, student or family, budget, quiet or lively, parks or cafes) and click <strong>Match me</strong> so all 3 villages pitch to you.</div>
+  <div class="bar">
+    <input type="text" id="q" placeholder="Ask a question, or describe yourself for Match me…" autocomplete="off" autofocus>
+    <button class="send" id="send">Ask</button>
+    <button type="button" class="match-btn" id="matchBtn" title="All three villages pitch why you fit or do not fit them">Match me</button>
+  </div>
+  <div class="foot">AI voices made by Fontys students (Moonshot AI team), not the real places or people. Every answer is saved for a hand check. · Me &amp; My Machine: Cyborg</div>
 </form>
 
 <script>
 // Example questions for whoever plays with it. Clicking one asks it right away.
 const SUGGESTIONS = [
   "Who are you, really?",
-  "Who painted you, and how often?",
-  "Moesten de boeren hun graan hier laten malen?",
-  "Were there bombings here during the war?",
-  "Wie heeft hier vroeger gevoetbald?",
-  "Has it been a wet week?",
-  "Who was the last miller here?",
+  "Did Van Gogh paint you?",
+  "Is Strijp young or old?",
+  "I'm a student: Gestel or Strijp?",
+  "Wonen er veel ouderen in Gestel?",
+  "Who was Het Kanon?",
+  "Tell me a fun fact",
+  "Is the air clean today?",
+  "When is the market?",
 ];
-const COLORS = { gestel: "var(--gestel)", strijp: "var(--strijp)" };
+const MATCH_PRESETS = [
+  { label: "Match me: Student", profile: "I'm a 21-year-old student looking for an affordable rented room near cafes, markets and public transport." },
+  { label: "Match me: Young family", profile: "We are a young family looking for a neighbourhood with playgrounds, parks and a newer home." },
+  { label: "Match me: New in Eindhoven", profile: "I just moved to Eindhoven for a tech job and want a lively district with culture, sports and shops." },
+];
+const COLORS = { gestel: "var(--gestel)", strijp: "var(--strijp)", woensel: "var(--woensel)" };
 
 const $ = (id) => document.getElementById(id);
 let history = [];          // the last few turns with the current village, so follow-ups work
@@ -153,7 +168,7 @@ function villageHtml(part, lang, isReaction) {
 
 async function ask(question) {
   if (busy || !question.trim()) return;
-  busy = true; $("send").disabled = true; $("q").value = "";
+  busy = true; $("send").disabled = true; $("matchBtn").disabled = true; $("q").value = "";
   document.querySelectorAll(".suggest button").forEach((b) => (b.disabled = true));
   const village = $("village").value, guest = $("guest").value;
   add(`<div class="bubble">${esc(question)}</div>`, "you");
@@ -183,7 +198,83 @@ async function ask(question) {
     wait.remove();
     add(`<div class="warn">The page lost the server. Is <code>python3 demo_page.py</code> still running?</div>`, "");
   } finally {
-    clearInterval(timer); busy = false; $("send").disabled = false; $("q").focus();
+    clearInterval(timer); busy = false; $("send").disabled = false; $("matchBtn").disabled = false; $("q").focus();
+    document.querySelectorAll(".suggest button").forEach((b) => (b.disabled = false));
+  }
+}
+
+async function matchMe(profileText) {
+  const profile = (profileText || $("q").value || "").trim();
+  if (busy) return;
+  if (!profile) {
+    $("q").focus();
+    $("q").placeholder = "Type a short line about yourself (e.g. student, family, quiet or lively) and click Match me…";
+    return;
+  }
+  busy = true; $("send").disabled = true; $("matchBtn").disabled = true; $("q").value = "";
+  document.querySelectorAll(".suggest button").forEach((b) => (b.disabled = true));
+  add(`<div class="bubble"><strong>Match me to a village:</strong> ${esc(profile)}</div>`, "you");
+
+  const wait = add(`<div class="thinking">All three villages are pitching their side of Eindhoven… <span>0</span> s</div>`, "");
+  const t0 = Date.now();
+  const timer = setInterval(() => { wait.querySelector("span").textContent = Math.round((Date.now() - t0) / 1000); }, 500);
+
+  try {
+    const res = await fetch("/match", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, lang: $("lang").value, previous_lang: lastLang }),
+    });
+    const data = await res.json();
+    wait.remove();
+    if (data.error) { add(`<div class="warn">${esc(data.error)}</div>`, ""); return; }
+    lastLang = data.lang;
+    for (const p of data.pitches) {
+      add(villageHtml(p, data.lang, false), "", COLORS[p.village]);
+    }
+    const pickDiv = add(`<div class="pick-row"><span>Which village fits you best? Click one to continue talking to it:</span></div>`, "");
+    const row = pickDiv.querySelector(".pick-row");
+    for (const p of data.pitches) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "Pick " + p.label;
+      btn.onclick = () => {
+        $("village").value = p.village;
+        const other = data.pitches.find((x) => x.village !== p.village);
+        $("guest").value = other ? other.village : "";
+        history = [{ role: "user", content: profile }, { role: "assistant", content: p.text }];
+        $("q").placeholder = `Ask ${p.label} a follow-up question…`;
+        const followUps = data.lang === "nl"
+          ? [
+              `Waar in ${p.label} staan de huurwoningen of nieuwere huizen?`,
+              `Hoe ziet het dagelijks leven in ${p.label} eruit (markt, parken, speeltuinen)?`,
+              `Hoe is het weer en de lucht in ${p.label} vandaag?`,
+            ]
+          : [
+              `Which part of ${p.label} has the most rented or newer homes?`,
+              `What is everyday life like in ${p.label} (markets, parks, playgrounds)?`,
+              `How is the weather and street pulse in ${p.label} right now?`,
+            ];
+        const contDiv = add(
+          `<div class="pick-row"><span>Now talking to <strong>${esc(p.label)}</strong> (${other ? esc(other.label) + " listens" : ""}). Ask a follow-up:</span></div>`,
+          ""
+        );
+        const fRow = contDiv.querySelector(".pick-row");
+        for (const fq of followUps) {
+          const fb = document.createElement("button");
+          fb.type = "button";
+          fb.textContent = fq;
+          fb.onclick = () => ask(fq);
+          fRow.appendChild(fb);
+        }
+        $("q").focus();
+      };
+      row.appendChild(btn);
+    }
+  } catch (e) {
+    wait.remove();
+    add(`<div class="warn">The page lost the server. Is <code>python3 demo_page.py</code> still running?</div>`, "");
+  } finally {
+    clearInterval(timer); busy = false; $("send").disabled = false; $("matchBtn").disabled = false; $("q").focus();
     document.querySelectorAll(".suggest button").forEach((b) => (b.disabled = false));
   }
 }
@@ -201,11 +292,17 @@ async function init() {
   if (info.villages.some((v) => v.name === "strijp")) $("guest").value = "strijp";
   // A new village means a new conversation: the old history belongs to someone else.
   $("village").addEventListener("change", () => { history = []; if ($("guest").value === $("village").value) $("guest").value = ""; });
+  for (const m of MATCH_PRESETS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "match-pill"; b.textContent = m.label; b.onclick = () => matchMe(m.profile);
+    $("suggest").appendChild(b);
+  }
   for (const q of SUGGESTIONS) {
     const b = document.createElement("button");
     b.type = "button"; b.textContent = q; b.onclick = () => ask(q);
     $("suggest").appendChild(b);
   }
+  $("matchBtn").onclick = () => matchMe($("q").value);
   pad();
 }
 

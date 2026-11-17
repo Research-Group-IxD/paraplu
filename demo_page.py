@@ -63,9 +63,26 @@ def make_handler(state):
                 self.send_error(404)
 
         def do_POST(self):
-            if self.path != "/ask":
+            if self.path not in ("/ask", "/match"):
                 return self.send_error(404)
             req = json.loads(self.rfile.read(int(self.headers["Content-Length"])) or b"{}")
+            previous = req.get("previous_lang") if req.get("previous_lang") in ("en", "nl") else "en"
+
+            if self.path == "/match":
+                profile = (req.get("profile") or "").strip()
+                if not profile:
+                    return self.send_json({"error": "Describe yourself or click a Match preset first."}, 400)
+                lang = req.get("lang") if req.get("lang") in ("en", "nl") else \
+                    poc.detect_language(profile, fallback=previous)
+                try:
+                    with state["lock"]:
+                        result = poc.run_match(state["model"], state["no_think"],
+                                               list(state["villages"].values()),
+                                               state["live"], profile, lang)
+                except SystemExit as e:
+                    return self.send_json({"error": str(e)}, 502)
+                return self.send_json(result)
+
             question = (req.get("question") or "").strip()
             home = state["villages"].get(req.get("village"))
             guest = state["villages"].get(req.get("guest")) if req.get("guest") else None
@@ -73,7 +90,6 @@ def make_handler(state):
                 return self.send_json({"error": "Pick a village and type a question."}, 400)
 
             # Language: forced by the page, or picked from the question (ties keep the last one).
-            previous = req.get("previous_lang") if req.get("previous_lang") in ("en", "nl") else "en"
             lang = req.get("lang") if req.get("lang") in ("en", "nl") else \
                 poc.detect_language(question, fallback=previous)
             # Only the last three exchanges, like the terminal.

@@ -1,6 +1,6 @@
 # Six Villages, One City: proof of concept
 
-Eindhoven grew out of six villages that merged on 1 January 1920. In this proof of concept two of them talk: **Gestel** (voiced by the Genneper watermill) and **Strijp** (voiced as footballer Coen Dillen). Each village answers only from its own list of sourced facts, shows which facts it used, and a second village can join in with a fact of its own. A local language model plays both, so there is no API key and no cost.
+Eindhoven grew out of six villages that merged on 1 January 1920. In this proof of concept three of them talk: **Gestel** (voiced by the Genneper watermill), **Strijp** (voiced as footballer Coen Dillen) and **Woensel** (voiced by the Oude Toren church tower). Each village answers only from its own list of sourced facts and live city data, shows which facts it used, and a second village can join in with a fact of its own—or all three can pitch why a visitor fits their neighbourhood in **Match me to a village** mode. A local language model plays all of them, so there is no API key and no cost.
 
 Moonshot AI team (Fontys, AI for Society minor) for the Lectoraat Immersive Technologies. Student prototype, not the real places or people.
 
@@ -20,7 +20,8 @@ ollama pull gemma3:12b
 | Demo page in the browser (open http://localhost:8000) | `python3 demo_page.py` |
 | Talk to one village in Terminal | `python3 poc.py gestel` |
 | Two villages: Gestel answers, Strijp may join in | `python3 poc.py gestel --with strijp` |
-| Run a question list (every answer is logged) | `python3 poc.py gestel --with strijp --batch questions/demo-check.txt` |
+| Match me to a village (all three villages pitch) | `python3 poc.py gestel --match "I'm a student looking for a room near cafes"` |
+| Run a question list (every answer is logged) | `python3 poc.py gestel --with strijp --batch questions/event-17nov.txt` |
 | Force a language | add `--lang nl` or `--lang en` |
 | Mac slow or freezing? Health check | `python3 doctor.py` |
 

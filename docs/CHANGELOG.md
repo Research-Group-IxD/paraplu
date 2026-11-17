@@ -2,6 +2,20 @@
 
 Every fix below came from a real answer in `logs/truth_check.csv` (model gemma3:12b on the team's MacBook). Newest first.
 
+## 16 Nov (evening): CBS comparison fixes, live city pulse and "Match me to a village"
+
+After running the first CBS and Woensel tests on the Mac (16 Nov 13:20 and 14:35), we saved `poc_v5_before_17nov.py` as version A and fixed seven issues before the 17 Nov client meeting and AI and Data Event:
+
+1. **Reactions compare on the same topic and keep their voice:** `reaction_prompt` and `reaction_on_topic` now allow the second village to compare its own figures on the same topic (against the Eindhoven average) and `keep_fact_sentences` keeps at most one short in-character sentence without an id (no digits, no proper names, no false corrections).
+2. **No false corrections across village numbers:** told the reaction prompt that the two villages have different numbers for their own districts, and blocked unbacked `"X is mistaken"` / `"too high"` / `"off"` claims and reactions with numbers not in the guest's facts.
+3. **Sentence-level citation cleanup (`clean_sentence_citations`):** moves `[id]` off short `"Yes, there are [G14]."` openers onto the fact sentence, strips ids from `"I don't know"` / refusal / opinion filler, drops stray extra ids whose numbers are absent from the sentence, and drops sentences with invented website domains.
+4. **Fun-fact and persona-tic rules:** when asked for a fun fact, the village picks a colourful specific fact (`G05`, `W09`) instead of row 1 (`G01`, `W01`), and `persona.md` files were toned down so Gestel and Woensel do not repeat their river or "last few farms" tic in every answer.
+5. **Comparable data across all three villages:** added Woensel CBS 2023 rows (`W12` to `W19`), removed Strijp's duplicate population row (`S10`, keeping `S18` at 39,200), added source link for `W05`, and added everyday market/park/transport facts (`G21`, `S25`, `W20`).
+6. **Live city pulse (`L-PULSE`, `data.eindhoven.nl`):** every village now fetches its public playground count (`speelplekken`) and its total and newest BuitenBeter citizen street reports (`meldingen-openbare-ruimte-binnenbeter`) live from Eindhoven's open data portal.
+7. **Interactive "Match me to a village" mode (`--match` in `poc.py`, `/match` on the demo page):** a visitor describes who they are or clicks a preset (Student, Young family, New in Eindhoven), and all three villages (`Gestel`, `Strijp`, `Woensel`) pitch why their side of the city fits or does not fit using their own sourced facts, followed by one-click buttons to keep talking to the village the visitor picks.
+
+Side-by-side before/after results on the 10-question event batch are saved in `logs/before_after_17nov.md`.
+
 ## 16 Nov: Woensel added, with three new live facts
 
 Woensel (the Oude Toren, 11 facts from Mai's research in the Village entities doc) is the third village. New live fact `L-AIR`: the latest hourly NO2 and O3 values of the Luchtmeetnet station on the Genovevalaan (NL10236), which stands in Woensel itself. New live fact `L-DUST`: PM2.5 and PM10 from the city's own fine-dust sensors (data.eindhoven.nl, real-time-fijnstof-monitoring), for every village in `LIVE_PLACES`: the average of the sensors within 1.5 km of the village's point, or else the nearest one within 3 km. New live fact `L-WEATHER` for every village: sky, temperature, feels-like temperature and wind right now, from Open-Meteo. The air facts give numbers only, no "good" or "bad", because no checked fact says where the line is.
