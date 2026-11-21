@@ -1,4 +1,18 @@
-# IxD Research Project Template
+# Six Villages, One City
+
+Eindhoven's former villages talk as AI characters that answer only from sourced facts and live city data. Student project of the Moonshot AI team (Fontys ICT, minor AI for Society) for Research Group IxD.
+
+- **Code and how to run it:** [`six-villages/`](six-villages/README.md)
+- **Project page:** [`docs/index.html`](docs/index.html)
+- **What broke in testing and how it was fixed:** [`six-villages/docs/CHANGELOG.md`](six-villages/docs/CHANGELOG.md)
+
+Team: Nikita Matiushchenko, Mai Lê, Nilay Sharma, Sem Schakenraad, Ella Faye Fong. Me & My Machine: Cyborg.
+
+---
+
+The rest of this README comes from the IxD template and describes how this repository is set up.
+
+## IxD Research Project Template
 
 A clean, modern, and mobile-friendly template for creating academic project pages and fostering collaborative research. This template is maintained by the [Fontys University of Applied Sciences' Interaction Design (IxD) Research Group](https://www.ixdfontysict.nl) to help students and researchers showcase their work effectively and collaborate efficiently.
 
