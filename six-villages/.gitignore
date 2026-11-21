@@ -1,0 +1,14 @@
+# Answer logs hold the questions visitors typed: they stay on the laptop
+logs/
+# Python cache and local environments
+__pycache__/
+.venv/
+.env
+# macOS
+.DS_Store
+# Old local copies from 2 Nov (Git keeps the history from now on)
+poc_v*.py
+poc_v0_backup_2nov.py
+demo_page_v*.py
+web/index_v*.html
+MORNING_BRIEF_*.md
